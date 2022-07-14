@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+option java_package = "org.winry.proto";
+option java_outer_classname = "CommonProtos";
+
+message ProtoMessage {
+    string cmd = 1;
+    bytes data = 2;
+}
+
+message Success {
+    string detail = 1;
+}
+
+message Failure {
+    string detail = 1;
+}
+
+//@description: 通用整型值对象
+message CommonInteger {
+    int32 value = 1; //整型值
+}
+//@description: 通用整型值列表对象
+message CommonIntegerList {
+    repeated int32 value = 1; //整型值
+}
+//@description: 通用长整型值对象
+message CommonLong {
+    int64 value = 1; //长整型值
+}
+//@description: 通用长整型值列表对象
+message CommonLongList {
+    repeated int64 value = 1; //长整型值
+}
+//@description: 通用字符串格式对象
+message CommonString {
+    string value = 1; //字符串值
+}
+message CommonStringList {
+    repeated string value = 1;
+}
+//@description: 通用布尔值对象
+message CommonBoolean {
+    bool value = 1; //布尔值
+}
