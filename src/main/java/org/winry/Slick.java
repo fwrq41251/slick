@@ -12,6 +12,7 @@ import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.winry.proto.CommonProtos.ProtoMessage;
+import org.winry.proto.ProtoMessageInboundHandler;
 
 import java.net.InetSocketAddress;
 
@@ -61,6 +62,7 @@ public class Slick {
             //protobuf decoder
             pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1048576, 0, 4, 0, 4));
             pipeline.addLast("protobufDecoder", new ProtobufDecoder(ProtoMessage.getDefaultInstance()));
+            pipeline.addLast("protoMessageInboundHandler", new ProtoMessageInboundHandler());
 
             //protobuf encoder
             pipeline.addLast("frameEncoder", new LengthFieldPrepender(4));

@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.winry.util.ProtobufUtil;
 import org.winry.util.ReflectionUtil;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,11 +26,12 @@ public class MessageDispatcher {
             try {
                 Class<? extends AbstractRequestHandler<?>> requestHandlerClass = handlerMap.get(cmd);
                 AbstractRequestHandler<T> requestHandler =
-                        (AbstractRequestHandler<T>) requestHandlerClass.getDeclaredConstructor(Channel.class).newInstance(channel);
+                        (AbstractRequestHandler<T>) requestHandlerClass.newInstance();
+                requestHandler.setCmd(cmd);
+                requestHandler.setChannel(channel);
                 Class<T> messageType = (Class<T>) ReflectionUtil.getGenericActualType(requestHandlerClass);
                 requestHandler.handle(ProtobufUtil.fromBytes(messageType, data));
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                     NoSuchMethodException e) {
+            } catch (InstantiationException | IllegalAccessException e) {
                 LOGGER.error("Failed to init handler", e);
             }
         } else {
