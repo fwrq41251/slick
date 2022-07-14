@@ -1,5 +1,6 @@
 package org.winry;
 
+import com.google.protobuf.ExtensionRegistry;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -11,8 +12,9 @@ import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.winry.handler.ProtoMessageInboundHandler;
 import org.winry.proto.CommonProtos.ProtoMessage;
-import org.winry.proto.ProtoMessageInboundHandler;
+import org.winry.util.HandlerAutoRegister;
 
 import java.net.InetSocketAddress;
 
@@ -27,6 +29,11 @@ public class Slick {
 
     public Slick port(int port) {
         this.port = port;
+        return this;
+    }
+
+    public Slick registerHandler(String handlerPackage) {
+        new HandlerAutoRegister(handlerPackage).register();
         return this;
     }
 
@@ -61,6 +68,7 @@ public class Slick {
             ChannelPipeline pipeline = socketChannel.pipeline();
             //protobuf decoder
             pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1048576, 0, 4, 0, 4));
+            ExtensionRegistry registry = ExtensionRegistry.newInstance();
             pipeline.addLast("protobufDecoder", new ProtobufDecoder(ProtoMessage.getDefaultInstance()));
             pipeline.addLast("protoMessageInboundHandler", new ProtoMessageInboundHandler());
 

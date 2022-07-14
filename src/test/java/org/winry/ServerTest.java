@@ -1,5 +1,7 @@
 package org.winry;
 
+import org.junit.Test;
+
 public class ServerTest {
 
 //    public void startClient() {
@@ -28,4 +30,9 @@ public class ServerTest {
 //            }
 //        }
 //    }
+
+    @Test
+    public void startServer() {
+        new Slick().start();
+    }
 }

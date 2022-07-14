@@ -13,7 +13,7 @@ import org.winry.handler.AbstractRequestHandler;
 import org.winry.handler.MessageDispatcher;
 import org.winry.proto.CommonProtos.CommonInteger;
 import org.winry.proto.CommonProtos.ProtoMessage;
-import org.winry.proto.ProtoMessageInboundHandler;
+import org.winry.handler.ProtoMessageInboundHandler;
 import org.winry.util.ProtobufUtil;
 
 public class HandlerTest {
