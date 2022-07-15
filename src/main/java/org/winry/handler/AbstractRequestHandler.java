@@ -2,7 +2,7 @@ package org.winry.handler;
 
 import com.google.protobuf.MessageLite;
 import io.netty.channel.Channel;
-import org.winry.util.ProtobufUtil;
+import org.winry.pojo.MyMessage;
 
 public abstract class AbstractRequestHandler<T extends MessageLite> {
 
@@ -12,11 +12,15 @@ public abstract class AbstractRequestHandler<T extends MessageLite> {
     protected abstract void handle(T t);
 
     protected void send(MessageLite message) {
-        channel.writeAndFlush(ProtobufUtil.toMessage(this.cmd, message));
+        channel.writeAndFlush(toMessage(cmd, message));
     }
 
     protected void send(String cmd, MessageLite message) {
-        channel.writeAndFlush(ProtobufUtil.toMessage(cmd, message));
+        channel.writeAndFlush(toMessage(cmd, message));
+    }
+
+    private MyMessage toMessage(String cmd, MessageLite message) {
+        return new MyMessage(cmd, message.toByteArray());
     }
 
     public void setChannel(Channel channel) {

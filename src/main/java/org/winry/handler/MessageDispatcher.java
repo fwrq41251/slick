@@ -23,7 +23,7 @@ public class MessageDispatcher {
         LOGGER.debug("Add handler, cmd:" + cmd + ", class:" + messageHandlerClass.getSimpleName());
     }
 
-    public static <T extends MessageLite> void dispatch(String cmd, ByteString data, Channel channel) {
+    public static <T extends MessageLite> void dispatch(String cmd, byte[] data, Channel channel) {
         if (handlerMap.containsKey(cmd)) {
             try {
                 RequestHandlerInfo handlerInfo = handlerMap.get(cmd);

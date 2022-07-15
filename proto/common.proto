@@ -3,11 +3,6 @@ syntax = "proto3";
 option java_package = "org.winry.proto";
 option java_outer_classname = "CommonProtos";
 
-message ProtoMessage {
-    string cmd = 1;
-    bytes data = 2;
-}
-
 message Success {
     string detail = 1;
 }

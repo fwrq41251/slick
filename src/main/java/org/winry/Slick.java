@@ -1,19 +1,15 @@
 package org.winry;
 
-import com.google.protobuf.ExtensionRegistry;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.LengthFieldPrepender;
-import io.netty.handler.codec.protobuf.ProtobufDecoder;
-import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.winry.handler.ProtoMessageInboundHandler;
-import org.winry.proto.CommonProtos.ProtoMessage;
+import org.winry.codec.MyMessageDecoder;
+import org.winry.codec.MyMessageEncoder;
+import org.winry.handler.MyMessageInboundHandler;
 import org.winry.util.HandlerAutoRegister;
 
 import java.net.InetSocketAddress;
@@ -61,20 +57,23 @@ public class Slick {
         }
     }
 
+    /**
+     *   <pre>
+     *   | Length | CmdLength | Cmd  | Data           |
+     *   |--------|-----------|------|----------------|
+     *   | 0x000E | 0x0010    | "my" | "HELLO, WORLD" |
+     *   </pre>
+     */
     static class SlickChannelInitializer extends ChannelInitializer<SocketChannel> {
 
         @Override
-        protected void initChannel(SocketChannel socketChannel) throws Exception {
+        protected void initChannel(SocketChannel socketChannel) {
             ChannelPipeline pipeline = socketChannel.pipeline();
-            //protobuf decoder
-            pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1048576, 0, 4, 0, 4));
-            ExtensionRegistry registry = ExtensionRegistry.newInstance();
-            pipeline.addLast("protobufDecoder", new ProtobufDecoder(ProtoMessage.getDefaultInstance()));
-            pipeline.addLast("protoMessageInboundHandler", new ProtoMessageInboundHandler());
 
-            //protobuf encoder
-            pipeline.addLast("frameEncoder", new LengthFieldPrepender(4));
-            pipeline.addLast("protobufEncoder", new ProtobufEncoder());
+            pipeline.addLast("myMessageDecoder", new MyMessageDecoder());
+            pipeline.addLast("protoMessageInboundHandler", new MyMessageInboundHandler());
+
+            pipeline.addLast("myMessageEncoder", new MyMessageEncoder());
         }
     }
 }

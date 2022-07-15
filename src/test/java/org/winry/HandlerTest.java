@@ -1,20 +1,20 @@
 package org.winry;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.LengthFieldPrepender;
-import io.netty.handler.codec.protobuf.ProtobufDecoder;
-import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import org.junit.Before;
 import org.junit.Test;
+import org.winry.codec.MyMessageDecoder;
+import org.winry.codec.MyMessageEncoder;
 import org.winry.handler.AbstractRequestHandler;
 import org.winry.handler.MessageDispatcher;
+import org.winry.handler.MyMessageInboundHandler;
 import org.winry.proto.CommonProtos.CommonInteger;
-import org.winry.proto.CommonProtos.ProtoMessage;
-import org.winry.handler.ProtoMessageInboundHandler;
-import org.winry.util.ProtobufUtil;
+
+import java.nio.charset.StandardCharsets;
 
 public class HandlerTest {
 
@@ -27,7 +27,20 @@ public class HandlerTest {
     public void protoMessageTest() {
         EmbeddedChannel channel = new EmbeddedChannel(new TestChannelInitializer());
         CommonInteger i = CommonInteger.newBuilder().setValue(4).build();
-        channel.writeInbound(ProtobufUtil.toMessage("test", i));
+
+        ByteBuf byteBuf = Unpooled.buffer();
+        byte[] cmd = "test".getBytes(StandardCharsets.UTF_8);
+        int cmdLength = cmd.length;
+        byte[] data = i.toByteArray();
+        int lengthFieldLength = 8;
+        int totalLength = cmdLength + data.length + lengthFieldLength;
+
+        byteBuf.writeInt(totalLength);
+        byteBuf.writeInt(cmdLength);
+        byteBuf.writeBytes(cmd);
+        byteBuf.writeBytes(data);
+
+        channel.writeInbound(byteBuf);
         channel.finish();
     }
 
@@ -42,16 +55,13 @@ public class HandlerTest {
     public static class TestChannelInitializer extends ChannelInitializer<EmbeddedChannel> {
 
         @Override
-        protected void initChannel(EmbeddedChannel socketChannel) throws Exception {
+        protected void initChannel(EmbeddedChannel socketChannel) {
             ChannelPipeline pipeline = socketChannel.pipeline();
-            //protobuf decoder
-            pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1048576, 0, 4, 0, 4));
-            pipeline.addLast("protobufDecoder", new ProtobufDecoder(ProtoMessage.getDefaultInstance()));
-            pipeline.addLast("protoMessageInboundHandler", new ProtoMessageInboundHandler());
 
-            //protobuf encoder
-            pipeline.addLast("frameEncoder", new LengthFieldPrepender(4));
-            pipeline.addLast("protobufEncoder", new ProtobufEncoder());
+            pipeline.addLast("myMessageDecoder", new MyMessageDecoder());
+            pipeline.addLast("protoMessageInboundHandler", new MyMessageInboundHandler());
+
+            pipeline.addLast("myMessageEncoder", new MyMessageEncoder());
         }
     }
 }
