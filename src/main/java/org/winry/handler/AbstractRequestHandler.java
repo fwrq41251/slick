@@ -1,30 +1,28 @@
 package org.winry.handler;
 
 import com.google.protobuf.MessageLite;
-import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import org.winry.pojo.MyMessage;
+import org.winry.pojo.User;
 
 public abstract class AbstractRequestHandler<T extends MessageLite> {
 
-    private Channel channel;
+    private ChannelHandlerContext ctx;
     private String cmd;
 
-    protected abstract void handle(T t);
+    protected abstract void handle(User user, T t);
 
     protected void send(MessageLite message) {
-        channel.writeAndFlush(toMessage(cmd, message));
+        ctx.writeAndFlush(new MyMessage(cmd, message));
     }
 
     protected void send(String cmd, MessageLite message) {
-        channel.writeAndFlush(toMessage(cmd, message));
+        ctx.writeAndFlush(new MyMessage(cmd, message));
     }
 
-    private MyMessage toMessage(String cmd, MessageLite message) {
-        return new MyMessage(cmd, message.toByteArray());
-    }
 
-    public void setChannel(Channel channel) {
-        this.channel = channel;
+    public void setChannelHandlerContext(ChannelHandlerContext ctx) {
+        this.ctx = ctx;
     }
 
     public void setCmd(String cmd) {

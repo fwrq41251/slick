@@ -12,6 +12,7 @@ import org.winry.codec.MyMessageEncoder;
 import org.winry.handler.AbstractRequestHandler;
 import org.winry.handler.MessageDispatcher;
 import org.winry.handler.MyMessageInboundHandler;
+import org.winry.pojo.User;
 import org.winry.proto.CommonProtos.CommonInteger;
 
 import java.nio.charset.StandardCharsets;
@@ -47,7 +48,7 @@ public class HandlerTest {
     public static class TestIntegerHandler extends AbstractRequestHandler<CommonInteger> {
 
         @Override
-        protected void handle(CommonInteger commonInteger) {
+        protected void handle(User user, CommonInteger commonInteger) {
             System.out.println(commonInteger.getValue());
         }
     }

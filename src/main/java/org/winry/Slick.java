@@ -5,16 +5,21 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.winry.codec.MyMessageDecoder;
 import org.winry.codec.MyMessageEncoder;
 import org.winry.handler.MyMessageInboundHandler;
+import org.winry.user.DefaultUserManager;
+import org.winry.user.UserManager;
 import org.winry.util.HandlerAutoRegister;
 
 import java.net.InetSocketAddress;
 
 public class Slick {
+
+    private static UserManager userManager;
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Slick.class);
 
@@ -57,8 +62,15 @@ public class Slick {
         }
     }
 
+    public static UserManager userManager() {
+        if (userManager == null) {
+            userManager = new DefaultUserManager();
+        }
+        return userManager;
+    }
+
     /**
-     *   <pre>
+     * <pre>
      *   | Length | CmdLength | Cmd  | Data           |
      *   |--------|-----------|------|----------------|
      *   | 0x000E | 0x0010    | "my" | "HELLO, WORLD" |
@@ -70,10 +82,12 @@ public class Slick {
         protected void initChannel(SocketChannel socketChannel) {
             ChannelPipeline pipeline = socketChannel.pipeline();
 
+            pipeline.addLast("idleStateHandler", new IdleStateHandler(300, 0, 0));
             pipeline.addLast("myMessageDecoder", new MyMessageDecoder());
             pipeline.addLast("protoMessageInboundHandler", new MyMessageInboundHandler());
 
             pipeline.addLast("myMessageEncoder", new MyMessageEncoder());
+
         }
     }
 }
