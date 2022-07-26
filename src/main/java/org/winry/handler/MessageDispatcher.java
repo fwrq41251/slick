@@ -8,6 +8,7 @@ import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.winry.Slick;
+import org.winry.exception.NotLoginException;
 import org.winry.pojo.User;
 import org.winry.user.DefaultUserManager;
 import org.winry.user.UserIdParam;
@@ -43,6 +44,9 @@ public class MessageDispatcher {
                     UserIdParam userIdParam = (UserIdParam) t;
                     user = getUser(userIdParam.getUserId(), ctx.channel());
                 }
+                if (user == null) {
+                    throw new NotLoginException("user Not login");
+                }
                 requestHandler.handle(user, t);
             } catch (InstantiationException | InvalidProtocolBufferException | IllegalAccessException e) {
                 LOGGER.error("Failed to init handler", e);
@@ -50,6 +54,11 @@ public class MessageDispatcher {
         } else {
             LOGGER.info("Unknown cmd:" + cmd);
         }
+    }
+
+    public static <S extends MessageLite> void dispatch(String cmd, S s, ChannelHandlerContext ctx, User user) {
+        byte[] data = s.toByteArray();
+        dispatch(cmd, data, ctx, user);
     }
 
     private static User getUser(int userId, Channel channel) {

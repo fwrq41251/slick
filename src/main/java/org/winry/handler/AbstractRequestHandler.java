@@ -28,4 +28,8 @@ public abstract class AbstractRequestHandler<T extends MessageLite> {
     public void setCmd(String cmd) {
         this.cmd = cmd;
     }
+
+    protected <S extends MessageLite> void forward(String cmd, S s, User user) {
+        MessageDispatcher.dispatch(cmd, s, ctx, user);
+    }
 }

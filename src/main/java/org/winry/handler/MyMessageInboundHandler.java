@@ -7,6 +7,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.winry.Slick;
+import org.winry.exception.NotLoginException;
 import org.winry.pojo.MyMessage;
 import org.winry.pojo.User;
 import org.winry.user.DefaultUserManager;
@@ -29,6 +30,9 @@ public class MyMessageInboundHandler extends SimpleChannelInboundHandler<MyMessa
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         LOGGER.error("Error handle request", cause);
+        if (cause instanceof NotLoginException) {
+            ctx.close();
+        }
     }
 
     @Override
