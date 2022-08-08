@@ -16,40 +16,40 @@ import java.util.stream.Collectors;
  */
 public final class ReflectionUtil {
 
-	private ReflectionUtil() {
-	}
+    private ReflectionUtil() {
+    }
 
-	public static Class<?> getGenericActualType(Class<?> clazz) {
-		return (Class<?>) ((ParameterizedType) clazz
-				.getGenericSuperclass()).getActualTypeArguments()[0];
-	}
+    public static Class<?> getGenericActualType(Class<?> clazz) {
+        return (Class<?>) ((ParameterizedType) clazz
+                .getGenericSuperclass()).getActualTypeArguments()[0];
+    }
 
-	public static List<Field> getAllFields(Class<?> clazz) {
-		List<Field> fields = new LinkedList<>();
+    public static List<Field> getAllFields(Class<?> clazz) {
+        List<Field> fields = new LinkedList<>();
 
-		for (Field field : clazz.getDeclaredFields()) {
-			final int modifiers = field.getModifiers();
-			if (Modifier.isPrivate(modifiers) && !Modifier.isStatic(modifiers)) {
-				fields.add(field);
-			}
-		}
-		if (clazz.getSuperclass() != null) {
-			fields.addAll(getAllFields(clazz.getSuperclass()));
-		}
-		return fields;
-	}
+        for (Field field : clazz.getDeclaredFields()) {
+            final int modifiers = field.getModifiers();
+            if (Modifier.isPrivate(modifiers) && !Modifier.isStatic(modifiers)) {
+                fields.add(field);
+            }
+        }
+        if (clazz.getSuperclass() != null) {
+            fields.addAll(getAllFields(clazz.getSuperclass()));
+        }
+        return fields;
+    }
 
-	public static Set<Class<?>> getClassesUnder(String myPackage) {
-		try {
-			return ClassPath.from(ReflectionUtil.class.getClassLoader()).getTopLevelClasses(myPackage).stream().map(c -> {
-				try {
-					return Class.forName(c.getName());
-				} catch (ClassNotFoundException e) {
-					throw new RuntimeException(e);
-				}
-			}).collect(Collectors.toSet());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    public static Set<Class<?>> getClassesUnder(String myPackage) {
+        try {
+            return ClassPath.from(ReflectionUtil.class.getClassLoader()).getTopLevelClasses(myPackage).stream().map(c -> {
+                try {
+                    return Class.forName(c.getName());
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toSet());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

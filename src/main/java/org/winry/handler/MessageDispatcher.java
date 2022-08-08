@@ -57,8 +57,20 @@ public class MessageDispatcher {
     }
 
     public static <S extends MessageLite> void dispatch(String cmd, S s, ChannelHandlerContext ctx, User user) {
-        byte[] data = s.toByteArray();
-        dispatch(cmd, data, ctx, user);
+        if (handlerMap.containsKey(cmd)) {
+            try {
+                RequestHandlerInfo handlerInfo = handlerMap.get(cmd);
+                AbstractRequestHandler<S> requestHandler =
+                        (AbstractRequestHandler<S>) handlerInfo.handlerType.newInstance();
+                requestHandler.setCmd(cmd);
+                requestHandler.setChannelHandlerContext(ctx);
+                requestHandler.handle(user, s);
+            } catch (InstantiationException | IllegalAccessException e) {
+                LOGGER.error("Failed to init handler", e);
+            }
+        } else {
+            LOGGER.info("Unknown cmd:" + cmd);
+        }
     }
 
     private static User getUser(int userId, Channel channel) {
